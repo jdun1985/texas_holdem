@@ -62,7 +62,7 @@ class Test(unittest.TestCase):
     in the setUpClass() method.
     
     The class methods are:
-    testPHPCompOpHighCard(), testPHPCompOpPair(), ... , PHPCompOpSFlush():
+    testPHPCompOpHighCard(), testPHPCompOpPair(), ... , testPHPCompOpSFlush():
     These test the comparison operators of the PokerHandParser class.
     They all follow the same methodology:
         Construct the highest raking hand, a middle ranking hand, and the lowest
@@ -212,7 +212,6 @@ class Test(unittest.TestCase):
         self.assertTrue(all_hands_gt_high_card_high == 0)
                 
     def testPHPCompOpSFlush(self):
-        hand = []
         
         # Straight Flush
         hand = []

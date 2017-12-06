@@ -1,39 +1,7 @@
 from texas_holdem.Deck import Deck
 from texas_holdem.Player import Player
-from texas_holdem.Card import Card
-
-from texas_holdem.PokerHandParser import PokerHandParser
-
 from random import choice
 from collections import OrderedDict
-from itertools import combinations
-
-import sympy
-import time
-import multiprocessing
-import os
-from _operator import itemgetter
-from enum import IntEnum
-
-def partitionList(p_list, n):
-    '''
-    Return a list of lists partitioned into n lists
-    partition([0, 1, 2, 3, 4, 5, 6, 7, 8], 4)
-    returns: [[0, 1], [2, 3], [4, 5], [6, 7, 8]]
-    '''
-    ret = []
-    assert (n > 0)
-    l = len(p_list)
-    assert (l > 0 and l >= n)
-    p_size = len(p_list)//n
-    ret.append(p_list[:p_size])
-    for i in range(1, n - 1):
-        ret.append(p_list[p_size*i:p_size*(i+1)])
-    ret.append(p_list[p_size*(n-1):])
-    return ret
-
-
-    
 
 '''
 What has been will be again, what has been done will be done again; there is nothing new under the sun.
@@ -68,37 +36,47 @@ class Table():
 
     def __init__(self, big_blind):
         
-        self.players = OrderedDict()
-        self.players_list = []
+        self.players = OrderedDict()    #A player-name keyed ordered-dictionary with Player objects as values.
         
-        self.dealer_name = None  # Name of the player who is the dealer_name
-        self.dealer_index = None  # Index into players_list which indicates which player is the dealer_name
-        self.small_blind_player = None  # Name of the player responsible for the small blind
-        self.big_blind_player = None  # Name of the player responsible for the big blind
-        self.action_player = None # Name of player that needs to perform an action
-        self.split_players = [] # Contains the names of the blind players who couldn't meet the blind
+        self.players_list = []  #A list of player names, indexed in the same order as the self.players ordered-dictionary.
+        
+        self.dealer_index = None    #Index into players_list which indicates which player is the dealer_name.        
+        
+        self.dealer_name = None #Name of the player who is the dealer_name.
+        
+        self.small_blind_player = None  #Name of the player responsible for the small blind.
+        self.big_blind_player = None    #Name of the player responsible for the big blind.
+        
+        self.action_player = None   #Name of player that needs to perform an action.
+        
+        self.split_players = [] #Contains the names of the players who have split the pot.
+        self.is_split_pot = False #Boolean flag indicating that a pot is split.
 
-        self.big_blind = None #big_blind
-        self.small_blind = None #self.big_blind // 2  # As per WSOP, standard convention for setting the small blind is 1/2 the big blind.
-        self.buy_in = None #20 * big_blind  # As per WSOP, standard convention for setting the buy in is 20 times the big blind.
-        self.pot = None
+        self.big_blind = None #Integer Big Blind ammount.
+        self.small_blind = None #Integer Small Blind ammount, as per WSOP, standard convention for setting the small blind is 1/2 the big blind.
+        self.buy_in = None #Integer buy in ammount, as per WSOP, standard convention for setting the buy in is 20 times the big blind.
+        self.pot = None #Integer representing the current total of all the bets in the current hand being played.
 
-        self.burn_pile = []
-        self.community_cards = []        
-
-        self.is_split_pot = False
+        self.burn_pile = [] #Card object list of the cards that have been burned.  TODO: Decide if necessary in this context.
+        self.community_cards = [] #Card object list
 
         self.hand_index = None # Index of the current hand, i.e. The first hand of the game is 0, the second is 1 etc.
         
         self.setupGame(big_blind)
         
     def setupGame(self, big_blind):
-        """Adds the players to the table, and determines the first dealer.
+        """Initializes the blind, and buy in amounts.
+        Initializes the pot to 0.
+        Initializes the hand_index.
         
-        TODO add file input, user input
+        Adds the players to the table.
+        
+        Determines the first dealer.
+        
+        TODO: add file input, user input
         
         Args:
-            None
+            big_blind: used to determine the blind and buy in amounts.
         Returns:
             None
         Raises:
@@ -107,6 +85,7 @@ class Table():
         
         self.big_blind = big_blind
         self.small_blind = self.big_blind // 2  # As per WSOP, standard convention for setting the small blind is 1/2 the big blind.
+                                                # TODO: Protect integer.
         self.buy_in = 20 * big_blind  # As per WSOP, standard convention for setting the buy in is 20 times the big blind.
         self.pot = 0
         
@@ -129,6 +108,26 @@ class Table():
         
         self.printCurrentDealer()
 
+    def addPlayer(self, player):
+        """Adds a player object to the table.
+        
+        Args:
+            player: Player object.
+        Returns:
+            None
+        Raises:
+            None
+        """
+        assert isinstance(player, Player)
+        #TODO: Handle not (player.name in self.players)
+        assert not (player.name in self.players)
+        #TODO: Handle len(self.players) <= self.MAX_PLAYERS
+        assert len(self.players) <= self.MAX_PLAYERS
+
+        self.players[player.name] = player
+        self.players_list = list(self.players)            
+        self.players[player.name].stack = self.buy_in
+
     def dealPlayerCard(self, player):
         assert len(player.hole_cards) < 2
         assert len(player.hole_cards) >= 0
@@ -140,14 +139,6 @@ class Table():
         assert len(self.community_cards) >= 0
         
         self.community_cards.append(Table.deck.dealCard())
-                
-    def addPlayer(self, player):
-        assert not (player.name in self.players)
-        assert len(self.players) <= self.MAX_PLAYERS
-
-        self.players[player.name] = player
-        self.players_list = list(self.players)            
-        self.players[player.name].stack = self.buy_in 
 
     def removePlayer(self, player):
         assert player.name in self.players
@@ -271,6 +262,8 @@ def main():
     table.players[table.big_blind_player].printBets()
     
     print(table.pot)
+
+        
     
 
 
