@@ -84,8 +84,8 @@ class Table():
         """
         
         self.big_blind = big_blind
+        # TODO: Protect self.small_blind integer.
         self.small_blind = self.big_blind // 2  # As per WSOP, standard convention for setting the small blind is 1/2 the big blind.
-                                                # TODO: Protect integer.
         self.buy_in = 20 * big_blind  # As per WSOP, standard convention for setting the buy in is 20 times the big blind.
         self.pot = 0
         
@@ -110,6 +110,7 @@ class Table():
 
     def addPlayer(self, player):
         """Adds a player object to the table.
+        Initializes given players stack.
         
         Args:
             player: Player object.

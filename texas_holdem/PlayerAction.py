@@ -1,12 +1,20 @@
 class PlayerAction():
+    '''This class contains the bets posted by each player, and the activity
+    surrounding each betting session.
+    '''
     def __init__(self):
+        '''
+        '''
         self.blind = 0
         self.pre_flop = 0
         self.flop = 0
         self.turn = 0
         self.river = 0
         
-        self.act_blind = []
+        '''Logs of the players actions for a single hand, these are lists,
+        to account for multiple betting round activity.
+        '''
+        self.act_blind = []  
         self.act_pre_flop = []
         self.act_flop = []
         self.act_turn = []
@@ -14,6 +22,3 @@ class PlayerAction():
         
     def total(self):
         return self.blind + self.pre_flop + self.flop + self.turn + self.river
-    
-    def reset(self):
-        self.blind = self.pre_flop = self.flop = self.turn = self.river = 0

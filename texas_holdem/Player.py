@@ -35,7 +35,7 @@ class Player():
     def postBlind(self, amount, blind_type, hand_index):
         '''Post the blind.
         
-        It is possible for the player to post less than required, it is up to the Table to account
+        It is POSSIBLE for the player to post LESS than requested, it is up to the Table to account
         for this scenario.
         
         Args:
@@ -50,15 +50,33 @@ class Player():
         assert (blind_type == 'small') or (blind_type == 'big')
         
         if self.stack < amount:
+            #There is not enough in the stack to cover the blind.  Payer is All-in.
             self.bets[hand_index].blind = self.stack
             self.stack = 0
             self.is_all_in = True
-            self.bets[hand_index].act_blind.append('all-in on {} blind. blind required: {}, blind posted: {}'.format(blind_type, amount, self.bets[hand_index].blind))
+            self.bets[hand_index].act_blind.append(\
+                'blind posted. {} blind. blind required: {}. blind posted: {}. all-in.'\
+                .format(blind_type, amount, self.bets[hand_index].blind, self.name))
             return self.bets[hand_index].blind
         else:
             self.bets[hand_index].blind = amount
             self.stack = self.stack - amount
             self.is_all_in = False
-            self.bets[hand_index].act_blind.append('{} blind required: {}, blind posted: {}'.format(blind_type, amount, self.bets[hand_index].blind))
+            self.bets[hand_index].act_blind.append(\
+                'blind posted. {} blind. blind required: {}. blind posted: {}.'\
+                .format(blind_type, amount, self.bets[hand_index].blind))
             return amount
+    
+    def betPreFlop(self):
+        pass
+    
+    def betFlop(self):
+        pass
+    
+    def betTurn(self):
+        pass
+    
+    def betRiver(self):
+        pass
+    
         
