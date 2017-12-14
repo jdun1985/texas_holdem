@@ -31,7 +31,12 @@ class Table():
     MAX_PLAYERS = 10
     MIN_PLAYERS = 2
     PLAY_TIME_LIMIT = 180  # (Seconds) The player time limit to act.
-
+    
+    PRE_FLOP =  0
+    FLOP =      1
+    TURN =      2
+    RIVER =     3
+    
     deck = Deck()
 
     def __init__(self, big_blind):
@@ -56,6 +61,7 @@ class Table():
         self.small_blind = None #Integer Small Blind ammount, as per WSOP, standard convention for setting the small blind is 1/2 the big blind.
         self.buy_in = None #Integer buy in ammount, as per WSOP, standard convention for setting the buy in is 20 times the big blind.
         self.pot = None #Integer representing the current total of all the bets in the current hand being played.
+        self.current_bet_to_be_met = None
 
         self.burn_pile = [] #Card object list of the cards that have been burned.  TODO: Decide if necessary in this context.
         self.community_cards = [] #Card object list
@@ -89,7 +95,7 @@ class Table():
         self.buy_in = 20 * big_blind  # As per WSOP, standard convention for setting the buy in is 20 times the big blind.
         self.pot = 0
         
-        self.hand_index = 0
+        self.hand_index = -1 # setUpHand increments this, we index from 0, so it needs to be -1.
         
         self.addPlayer(Player("John"))
         self.addPlayer(Player("Jim"))
@@ -196,15 +202,17 @@ class Table():
         Raises:
             None
         """
+        
+        self.hand_index = self.hand_index + 1
+        
         for p in self.players:
-            #self.players[p].hand_index = self.hand_index
             self.players[p].setupHand(self.hand_index)
 
         self.pot = 0
         
         self.determineBlindPlayers()
         
-        posted_small_blind = self.players[self.small_blind_player].postBlind(self.small_blind, 'small', self.hand_index)
+        posted_small_blind = self.players[self.small_blind_player].postBlind(self.small_blind, 'small')
         
         assert posted_small_blind <= self.small_blind
         assert posted_small_blind > 0
@@ -215,7 +223,7 @@ class Table():
             
         self.pot = self.pot + posted_small_blind
         
-        posted_big_blind = self.players[self.big_blind_player].postBlind(self.big_blind, 'big', self.hand_index)
+        posted_big_blind = self.players[self.big_blind_player].postBlind(self.big_blind, 'big')
         
         assert posted_big_blind <= self.big_blind
         assert posted_big_blind > 0
@@ -225,20 +233,52 @@ class Table():
             self.is_split_pot = True
         
         self.pot = self.pot + posted_big_blind
+        self.current_bet_to_be_met = self.pot
         
     def printCurrentBets(self):
         for p in self.players_list:
             self.players[p].printBets()
         
     def dealHoleCards(self):
-        ''' TODO research itertools cycle , maybe enumerate list which gives indexes? '''
+        ''' TODO: research itertools cycle , maybe enumerate list which gives indexes? '''
         for i in range(2):
             for j in range(len(self.players_list)):
+                print(self.players_list[(j + self.dealer_index + 1) % len(self.players_list)])
                 self.dealPlayerCard(self.players[self.players_list[(j + self.dealer_index + 1) % len(self.players_list)]])
                 self.players[self.players_list[(j + self.dealer_index + 1) % len(self.players_list)]].printHoleCards()
 
     def conductBettingRound(self):
-        pass
+        '''
+        Check: 
+        Check is the poker term for "pass." If it is your turn and there has been no bet or there is
+        no blind to call, you may check and let the action pass to the next person. If everyone checks
+        the round is over.
+        
+        Bet:
+        If you don't feel like checking you may bet by putting chips/money into the pot
+        The amount you can bet differs depending on what the betting structure is. Once there's a bet,
+        the rest of the players have three actions to choose from.
+
+        FACING A BET ACTIONS
+            Call:
+            To call is to match the amount one of your opponents has a bet. Your turn is over unless
+            someone reopens the betting by raising. The round ends if everyone has either called or folded.
+        
+            Raise:
+            If there is a bet, anyone left to act can raise by putting in more money than the original bet.
+            
+            Fold:
+            Folding is simply throwing your hand away and waiting for the next one.
+            
+        In the pre-flop betting round, the Big blind bet needs to be met.  A player can call, raise, or fold.
+        In all other betting rounds: check, bet to start
+        '''
+        done = False
+        
+        while(not done):
+            for p in self.players_list:
+                last_player_action = self.players[p].action(self.players, self.current_bet_to_be_met)
+                
     
     def startGame(self):
         done = False
@@ -247,7 +287,7 @@ class Table():
             pass
             
 def main():
-    
+    '''    
     table = Table(50)
     
     table.determineBlindPlayers()
@@ -263,13 +303,26 @@ def main():
     table.players[table.big_blind_player].printBets()
     
     print(table.pot)
+    '''
 
+    
+    finished = False 
+    while(not finished):
+        # Player can call, raise, or fold.
+        print('The current bet is: {}'.format(55))
+        print("You can 'call', 'raise', or 'fold'.")
+        choice = input('Please enter your choice:  ')
         
-    
+        if choice not in ['call', 'raise', 'fold']:
+            print('Your entry was not valid.')
+            finished = False
+            continue
 
-
-
-
-    
+        if choice == 'call':
+            pass
+        elif choice == 'raise':
+            pass
+        elif choice == 'fold':
+            pass        
 if __name__ == "__main__":
     main()
