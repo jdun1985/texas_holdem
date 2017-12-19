@@ -2,6 +2,9 @@ from texas_holdem.Deck import Deck
 from texas_holdem.Player import Player
 from random import choice
 from collections import OrderedDict
+from sklearn.datasets import load_iris
+from sklearn import tree
+import numpy as np
 
 '''
 What has been will be again, what has been done will be done again; there is nothing new under the sun.
@@ -57,9 +60,9 @@ class Table():
         self.split_players = [] #Contains the names of the players who have split the pot.
         self.is_split_pot = False #Boolean flag indicating that a pot is split.
 
-        self.big_blind = None #Integer Big Blind ammount.
-        self.small_blind = None #Integer Small Blind ammount, as per WSOP, standard convention for setting the small blind is 1/2 the big blind.
-        self.buy_in = None #Integer buy in ammount, as per WSOP, standard convention for setting the buy in is 20 times the big blind.
+        self.big_blind = None #Integer Big Blind amount.
+        self.small_blind = None #Integer Small Blind amount, as per WSOP, standard convention for setting the small blind is 1/2 the big blind.
+        self.buy_in = None #Integer buy in amount, as per WSOP, standard convention for setting the buy in is 20 times the big blind.
         self.pot = None #Integer representing the current total of all the bets in the current hand being played.
         self.current_bet_to_be_met = None
 
@@ -247,6 +250,9 @@ class Table():
                 self.dealPlayerCard(self.players[self.players_list[(j + self.dealer_index + 1) % len(self.players_list)]])
                 self.players[self.players_list[(j + self.dealer_index + 1) % len(self.players_list)]].printHoleCards()
 
+    def preFlopBetting(self):
+        pass
+
     def conductBettingRound(self):
         '''
         Check: 
@@ -276,18 +282,10 @@ class Table():
         done = False
         
         while(not done):
-            for p in self.players_list:
-                last_player_action = self.players[p].action(self.players, self.current_bet_to_be_met)
-                
-    
-    def startGame(self):
-        done = False
-            
-        while not done:
             pass
             
 def main():
-    '''    
+    
     table = Table(50)
     
     table.determineBlindPlayers()
@@ -303,26 +301,38 @@ def main():
     table.players[table.big_blind_player].printBets()
     
     print(table.pot)
-    '''
-
     
-    finished = False 
-    while(not finished):
-        # Player can call, raise, or fold.
-        print('The current bet is: {}'.format(55))
-        print("You can 'call', 'raise', or 'fold'.")
-        choice = input('Please enter your choice:  ')
+    iris = load_iris()
+    features = iris.feature_names
+    print(features)
+    X = iris.data
+    print(X[[1,50,145]])
+    y = iris.target
+    print(y[[1,50,145]])
+    names = iris.target_names
+    for i in y[[1,50,145]]:
+        print(names[i])
         
-        if choice not in ['call', 'raise', 'fold']:
-            print('Your entry was not valid.')
-            finished = False
-            continue
-
-        if choice == 'call':
-            pass
-        elif choice == 'raise':
-            pass
-        elif choice == 'fold':
-            pass        
+    print(y)
+    
+    test_idx = [0,1,50,51,100,10]
+    
+    train_target = np.delete(y, test_idx)
+    train_data = np.delete(X, test_idx, axis=0)
+    
+    test_target = y[test_idx]
+    test_data = X[test_idx]
+    
+    clf = tree.DecisionTreeClassifier()
+    clf.fit(train_data, train_target)
+    
+    
+    y_pred = clf.predict(test_data)
+    print(y_pred)
+    print(test_data)
+    print(clf.tree_)
+    print(clf.max_depth)
+    
+    
 if __name__ == "__main__":
     main()

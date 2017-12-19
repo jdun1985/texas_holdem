@@ -71,14 +71,12 @@ class Player():
                 .format(blind_type, amount, self.bets[self.hand_index].blind))
             return amount
     
-    def action(self, players, bet_round_type, hand_action, amount):
-        '''
-        Args: 
-            players: The dictionary of players.
-            bet_round_type: 'preflop', 'flop', 'turn', 'river'
-            hand_action: 'check', 'bet'
-        Returns: ?
 
+        '''
+        Args:
+        Returns:
+        
+        Possible Actions:
         Check: 
         Check is the poker term for "pass." If it is your turn and there has been no bet or there is
         no blind to call, you may check and let the action pass to the next person. If everyone checks
@@ -101,42 +99,6 @@ class Player():
             Folding is simply throwing your hand away and waiting for the next one.
 
         '''
-
-        assert hand_action in ['check', 'bet']
-        assert self.stack > 0
-        
-        if self.hand_status == 'allin':
-            print('Player prompted for action and is already all-in.')
-            return
-        
-        if hand_action == 'bet':
-            finished = False 
-            while(not finished):
-                # Player can call, raise, or fold.
-                print('The current bet is: {}.'.format(amount))
-                print('Your stack is: {}.'.format(self.stack))
-                print('You can "call", "raise", or "fold".')
-                choice = input('Please enter your choice:  ')
-                
-                if choice not in ['call', 'raise', 'fold']:
-                    print('Your entry was not valid.')
-                    finished = False
-                    continue
-
-                if choice == 'call':
-                    if self.stack > amount:
-                        pass
-                    else: # Player is all-in.
-                        self.is_all_in = True
-                        self.hand_status = 'allin'
-                        self.addBet(bet_round_type, amount)
-                elif choice == 'raise':
-                    pass
-                else:# choice == 'fold':
-                    pass
-        else:
-            pass
-        
     
     def addBet(self, bet_round_type, action_type, amount):
         '''
@@ -159,6 +121,7 @@ class Player():
                 .format(action_type, amount, bet)
             if self.is_all_in:
                 log.append(' all-in.')
+            self.bets[self.hand_index].act_pre_flop.append(log)
             return bet
         
         elif bet_round_type == 'flop':
